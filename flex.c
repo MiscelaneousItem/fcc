@@ -13,18 +13,6 @@ static short isin(char a, char* b) {
   return 0;
 }
 
-// inittoken returns a array of bytes formatted as : [type (2 bytes)][value size (1 byte)][value ($size bytes)] representing a token
-static char* inittoken(uint16 token, char dsize, void* data) {
-  char* output = fstd_h_malloc( 2 + 1 + dsize);
-  fstd_h_memcpy(output, &token, 2);
-  uint16 offset = 2;
-  *(output + offset) = dsize;
-  offset++;
-  fstd_h_memcpy(output + offset, data, dsize);
-  return output;
-}
-
-
 char* fcc_lex(char* code_input) {
 
   fstd_assert(code_input != NULL);
@@ -40,6 +28,7 @@ char* fcc_lex(char* code_input) {
       if(isin(code_input[i], ";+-*/=") && j == 0) {
 	char c = code_input[i];
 	i++;
+	fstd_h_free(buffer);
 	if(c == ';') return inittoken(TOKEN_SEMICOLON,      0, NULL);
 	if(c == '+') return inittoken(TOKEN_PLUS,           0, NULL);
 	if(c == '-') return inittoken(TOKEN_MINUS,          0, NULL);
@@ -76,5 +65,6 @@ char* fcc_lex(char* code_input) {
     fstd_assert(j < 65);
     
   }
+  fstd_h_free(buffer);
   return NULL;
 }

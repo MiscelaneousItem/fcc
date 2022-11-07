@@ -4,6 +4,10 @@
 */
 #include "ftypes.h"
 
+
+// inittoken returns a token
+char* inittoken(uint16 token, char dsize, void* data);
+
 extern const uint16 TOKEN_SEMICOLON;
 extern const uint16 TOKEN_EQUALS;
 extern const uint16 TOKEN_PLUS;
@@ -30,10 +34,10 @@ extern const uint16 nt_var_declaration;
 extern const uint16 nt_var_assignment;
 /* 
    The array nterms[] is the corespondance table for nterms, it is formatted as follows :
-   [nterm to define][tokens / nterms that make up the nterm ][NTERM_VOID][...][NTERM_END];
+   [nterm to define][index of the method associated to the rule in nterm_methods[]() ][tokens / nterms that make up the nterm ][NTERM_VOID][...][NTERM_END];
 */
 extern const uint16 nterms[];
 /*
   The array nterm_methods[]() gives access to the methods associated to each expression of an nterm. These methods should return a correctly formatted nterm, print the fasm code to the output and do any additional incompiler actions necessary: add a var/function, etc...
 */
-extern const char* (*nterm_methods[])(char* tokens, uint16 ntokens);
+extern char* const ( *nterm_methods[])(char* tokens);

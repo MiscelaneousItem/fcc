@@ -1,6 +1,6 @@
 COMPILER = GCC
 _CCFILES = fcc.c flex.c fparse.c ftokens.c
-_CCFLAGS = -Wall
+_CCFLAGS = -Wall -o fcc
 _CC      = gcc
 
 ifeq ($(COMPILER), GCC)

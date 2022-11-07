@@ -21,6 +21,7 @@
 #define fstd_h_free(ptr)               free(ptr)
 #define fstd_h_memcpy(dest, src, size) memcpy(dest, src, size)
 #define fstd_memcmp(ptra, ptrb, size)  memcmp(ptra, ptrb, size)
+#define fstd_h_memset(dest, val, size) memset(dest, val, size)
      /* math functions */
 #define fstd_pow(a, b)                 pow(a, b)
       /*char type functions*/
