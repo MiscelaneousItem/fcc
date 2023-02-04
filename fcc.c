@@ -10,6 +10,7 @@
   - functions
   - function pointers
   - NO recursion
+  - 
  
   fC's standard library is as defined in fstd.h, and more precise information can be found in that header, however in general terms it seeks to mimic the C standard library.
 
@@ -17,11 +18,34 @@
   Lastly, due to the nature of the nature of fC's restrictions, writing self documenting code is much harder, so one should pay great attention to commenting and explaining how memory is laid out, but also to write checks and asserts to produce safe and reliable code.
 */
 
+#include <stdio.h>
+#include "fstd.h"
+
 #include "ftypes.h"
 #include "fparse.h"
 
+char* open_file(char* filepath) { // returns a char* containing the contents of a file
+  char* buffer;
+  
+  FILE* fp = fopen ( filepath , "r" );
+  if( !fp ) perror(filepath), exit(1);
+
+  fseek( fp , 0L , SEEK_END);
+  long size = ftell(fp);
+  rewind(fp);
+
+  buffer = calloc(size + 1, sizeof(char));
+  fread(buffer, size, 1, fp);
+  fclose(fp);
+
+  return buffer;
+} 
+
 int main(int argc, char** argv) {
-  char* code = "uint32 toto = 400; uint32 tata = 90; uint32 lolo;";
-  fcc_parse(code);
+  if(argc > 1) {
+    char* code = open_file(argv[1]);
+    fcc_parse(code);
+  }
+  else fprintf(stderr, "no input files\n");
   return 0;
 }

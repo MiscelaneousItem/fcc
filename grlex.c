@@ -1,7 +1,7 @@
 #include "ftypes.h"
 #include "fstd.h"
-#include "ftokens.h"
-#include "flex.h"
+#include "grtokens.h"
+#include "grlex.h"
 
 static short isin(char a, char* b) {
   // returns 1 if a is present in b, with strlen(b) < 65
@@ -25,39 +25,45 @@ char* fcc_lex(char* code_input) {
     i++;
   }
   while(code_input[i] != '\0') {
-    if(isin(code_input[i], " ;+-*/=\n\t") || code_input[i] == '\0') {
-      if(isin(code_input[i], ";+-*/=") && j == 0) {
+    if(isin(code_input[i], " \n\t:;|{%") || code_input[i] == '\0') {
+      if(isin(code_input[i], ":;|{%") && j == 0) {
 	char c = code_input[i];
-	#ifdef ULTRA_VERBOSE
+	#ifdef LEX_VERBOSE
 	printf("%c\n", (char)c);
 	#endif
 	i++;
 	fstd_h_free(buffer);
-	if(c == ';') return inittoken(TOKEN_SEMICOLON,      0, NULL);
-	if(c == '+') return inittoken(TOKEN_PLUS,           0, NULL);
-	if(c == '-') return inittoken(TOKEN_MINUS,          0, NULL);
-	if(c == '*') return inittoken(TOKEN_MULTIPLICATION, 0, NULL);
-	if(c == '/') return inittoken(TOKEN_DIVISION,       0, NULL);
-	if(c == '=') return inittoken(TOKEN_EQUALS,         0, NULL);
+	if(c == ':') return inittoken(TOKEN_COLON,      0, NULL);
+	if(c == ';') return inittoken(TOKEN_SEMICOLON,  0, NULL);
+	if(c == '|') return inittoken(TOKEN_PIPE,       0, NULL);
+	if(c == '%') return inittoken(TOKEN_PERCENT,    0, NULL);
+	
+	// code zone handling
+	uint16 zone_size = 100;
+	char* code_zone = calloc(zone_size, 1);
+	code_zone[0] = '{';
+	j = 1;
+	uint16 open = 1;
+	while(open) {
+	  i++;
+	  if(j > zone_size) code_zone = realloc(code_zone, zone_size += 100);
+	  if(code_input[i] == '{') open++;
+	  else if(code_input[i] == '}') open--;
+	  code_zone[j] = code_input[i];
+	  j++;
+	}
+	i++;
+#ifdef LEX_VERBOSE
+	printf("code_zone %s\n", code_zone);
+#endif
+	return inittoken(TOKEN_C_ZONE, zone_size, code_zone);
+	
       }
-      #if ULTRA_VERBOSE
+#ifdef LEX_VERBOSE
       printf("%s\n", buffer);
-      #endif
-      if(fstd_isdigit(buffer[0])) {
-	uint32 alpha = atoi(buffer);
-	fstd_h_free(buffer);
-	return inittoken( TOKEN_NUM, sizeof(uint32), &alpha);
-      }
+#endif      
       
-      if(fstd_isalpha(buffer[0])) {
-	uint32 k = 0;
-	while(typen[k]) {
-	  if(fstd_strcmp(typen[k], buffer) == 0) {
-	    fstd_h_free(buffer);
-	    return inittoken( TOKEN_TYPE, sizeof(uint16), &k);
-	  }
-	  k++;
-	}	
+      if(fstd_isalpha(buffer[0])) {	
 	char* token = inittoken( TOKEN_ALPHA, fstd_strlen(buffer) + 1, buffer);
 	fstd_h_free(buffer);
 	return token;
